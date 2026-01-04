@@ -40,7 +40,7 @@ export default function WorkEntryDetailPage() {
   useEffect(() => {
     async function fetchEntry() {
       if (params.id) {
-        const data = await getWorkEntryById(params.id as string)
+        const { entry: data } = await getWorkEntryById(params.id as string)
         setEntry(data)
         setLoadingEntry(false)
       }
@@ -132,7 +132,7 @@ export default function WorkEntryDetailPage() {
               </div>
               {isOwner && (
                 <div className="flex items-center gap-2">
-                  <Link href={`/dashboard/entry/${entry.id}/edit`}>
+                  <Link href={`/dashboard/edit/${entry.id}`}>
                     <Button variant="outline" size="sm">
                       <Edit className="w-4 h-4 mr-2" />
                       Edit

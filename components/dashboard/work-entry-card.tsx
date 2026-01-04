@@ -7,13 +7,16 @@ import { Button } from "@/components/ui/button"
 import { CheckCircle2, ExternalLink, Github, FileText, ImageIcon, Copy } from "lucide-react"
 import type { WorkEntry } from "@/types"
 import { useState } from "react"
+import { useAuth } from "@/context/auth-context"
 
 interface WorkEntryCardProps {
   entry: WorkEntry
 }
 
 export function WorkEntryCard({ entry }: WorkEntryCardProps) {
+  const { user } = useAuth()
   const [copied, setCopied] = useState(false)
+  const isOwner = user?.uid === entry.userId
 
   const formatDate = (date: Date) => {
     return new Date(date).toLocaleDateString("en-US", {
@@ -122,11 +125,20 @@ export function WorkEntryCard({ entry }: WorkEntryCardProps) {
         {entry.validatorName && (
           <p className="text-xs text-muted-foreground mb-4">Validated by {entry.validatorName}</p>
         )}
-        <Link href={`/dashboard/entry/${entry.id}`}>
-          <Button variant="outline" size="sm" className="w-full bg-transparent">
-            View Details
-          </Button>
-        </Link>
+        <div className="flex gap-2">
+          <Link href={`/dashboard/entry/${entry.id}`} className="flex-1">
+            <Button variant="outline" size="sm" className="w-full bg-transparent">
+              View Details
+            </Button>
+          </Link>
+          {isOwner && (
+            <Link href={`/dashboard/edit/${entry.id}`} className="flex-1">
+              <Button variant="default" size="sm" className="w-full">
+                Edit
+              </Button>
+            </Link>
+          )}
+        </div>
       </CardContent>
     </Card>
   )

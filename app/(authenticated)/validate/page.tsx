@@ -40,12 +40,20 @@ export default function ValidatePage() {
     setSuccess(false)
 
     try {
-      const workEntry = await getWorkEntryById(entryId.trim())
+      const { entry: workEntry, error: fetchError } = await getWorkEntryById(entryId.trim())
 
-      if (!workEntry) {
+      console.log("Debug validate:", {
+        currentUserId: user?.uid,
+        entryCreatorId: workEntry?.userId,
+        error: fetchError
+      })
+
+      if (fetchError) {
+        setError(`Error fetching work entry: ${fetchError}`)
+      } else if (!workEntry) {
         setError("Work entry not found. Please check the ID and try again.")
       } else if (workEntry.userId === user?.uid) {
-        setError("You cannot validate your own work entries.")
+        setError(`You cannot validate your own work entries. (Your ID: ${user?.uid}, Creator ID: ${workEntry.userId})`)
       } else if (workEntry.status === "validated") {
         setError("This work entry has already been validated.")
       } else {

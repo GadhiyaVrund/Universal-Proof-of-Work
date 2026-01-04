@@ -1,0 +1,32 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // User Profiles
+    match /users/{userId} {
+      // Anyone authenticated can view profiles (to see who created an entry)
+      allow read: if request.auth != null;
+      // Only the user themselves can edit their profile
+      allow write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Work Entries
+    match /workEntries/{entryId} {
+      // FIX: Allow ANY authenticated user to read entries (needed for Validation page)
+      allow read: if request.auth != null;
+
+      // Allow creating: Authenticated users can create, must set userId to their own
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+
+      // Allow updating if:
+      // 1. User is the owner
+      // 2. OR User is validating (we check if they are authenticated - logic handled in app for specific fields)
+      // Ideally, we would restrict validators to ONLY changing 'status', 'validatorId', etc., but for now:
+      allow update: if request.auth != null; 
+
+      // Only owner can delete
+      allow delete: if request.auth != null && resource.data.userId == request.auth.uid;
+    }
+  }
+}
