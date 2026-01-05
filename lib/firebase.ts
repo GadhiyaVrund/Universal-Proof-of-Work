@@ -1,38 +1,34 @@
-import { initializeApp, getApps } from "firebase/app"
+import { initializeApp, getApps, getApp } from "firebase/app"
 import { getAuth } from "firebase/auth"
 import { getFirestore } from "firebase/firestore"
 import { getStorage } from "firebase/storage"
 
+// Firebase config (CLIENT SAFE)
 const firebaseConfig = {
-  apiKey: "AIzaSyCTFCMhMpgECfBTPA7FogNWshYZ7bf77IU",
-  authDomain: "universal-proof-of-work.firebaseapp.com",
-  projectId: "universal-proof-of-work",
-  storageBucket: "universal-proof-of-work.firebasestorage.app",
-  messagingSenderId: "77301217670",
-  appId: "1:77301217670:web:69964175be1d502ce21407",
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY!,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN!,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID!,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET!,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID!,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID!,
 }
 
-// Check if Firebase is properly configured
-const isConfigured = Object.values(firebaseConfig).every((value) => value !== "")
 
-if (!isConfigured) {
-  console.log("Firebase Configuration Debug:")
-  Object.entries(firebaseConfig).forEach(([key, value]) => {
-    console.log(`${key}: ${value ? "Set" : "Missing"}`)
-  })
+
+// 🔥 FAIL FAST if env is broken
+if (Object.values(firebaseConfig).some((v) => !v)) {
+  throw new Error("❌ Firebase env variables are missing or invalid")
 }
 
-let app: ReturnType<typeof initializeApp> | null = null
-let auth: ReturnType<typeof getAuth> | null = null
-let db: ReturnType<typeof getFirestore> | null = null
-let storage: ReturnType<typeof getStorage> | null = null
+// ✅ SAFE SINGLETON INITIALIZATION
+const app =
+  getApps().length === 0
+    ? initializeApp(firebaseConfig)
+    : getApp()
 
-// Only initialize if properly configured
-if (isConfigured) {
-  app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0]
-  auth = getAuth(app)
-  db = getFirestore(app)
-  storage = getStorage(app)
-}
+// ✅ SERVICES (NON-NULL, GUARANTEED)
+const auth = getAuth(app)
+const db = getFirestore(app)
+const storage = getStorage(app)
 
-export { app, auth, db, storage, isConfigured }
+export { app, auth, db, storage }

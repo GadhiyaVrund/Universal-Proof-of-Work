@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { createUserWithEmailAndPassword } from "firebase/auth"
 import { doc, setDoc } from "firebase/firestore"
-import { auth, db, isConfigured } from "@/lib/firebase"
+import { auth, db } from "@/lib/firebase"
 
 export default function SignupPage() {
   const router = useRouter()
@@ -40,11 +40,7 @@ export default function SignupPage() {
     setLoading(true)
 
     try {
-      if (!auth || !db) {
-        setError("Firebase is not properly configured.")
-        setLoading(false)
-        return
-      }
+
 
       const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password)
       const user = userCredential.user
